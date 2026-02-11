@@ -1,0 +1,1 @@
+export { IRegulatoryDocumentRepository } from './index';

@@ -1,0 +1,33 @@
+export enum GMAType {
+  SALE = 'SALE',
+  TRANSFER = 'TRANSFER',
+  PURCHASE = 'PURCHASE',
+  FAIR = 'FAIR',
+  OTHER = 'OTHER',
+}
+
+export enum GMAStatus {
+  DRAFT = 'DRAFT',
+  PENDING_APPROVAL = 'PENDING_APPROVAL',
+  APPROVED = 'APPROVED',
+  IN_TRANSIT = 'IN_TRANSIT',
+  CLOSED = 'CLOSED',
+  REJECTED = 'REJECTED',
+  EXPIRED = 'EXPIRED',
+}
+
+export enum DocumentType {
+  RUNSA = 'RUNSA',
+  GMA = 'GMA',
+  VACCINE = 'VACCINE',
+  CERTIFICATE = 'CERTIFICATE',
+  PERMIT = 'PERMIT',
+  OTHER = 'OTHER',
+}
+
+export enum DocumentStatus {
+  VALID = 'VALID',
+  EXPIRING_SOON = 'EXPIRING_SOON',
+  EXPIRED = 'EXPIRED',
+  RENEWED = 'RENEWED',
+}
