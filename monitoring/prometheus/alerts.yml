@@ -1,0 +1,203 @@
+# ==========================================
+# PROMETHEUS ALERT RULES
+# ==========================================
+groups:
+  # ------------------------------------------
+  # API Health Alerts
+  # ------------------------------------------
+  - name: api_health
+    interval: 30s
+    rules:
+      - alert: APIDown
+        expr: up{job="sgg-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: api
+        annotations:
+          summary: "API is down"
+          description: "The SGG API has been down for more than 1 minute."
+
+      - alert: APIHighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High API error rate"
+          description: "API error rate is {{ $value | humanizePercentage }} over the last 5 minutes."
+
+      - alert: APIHighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High API latency"
+          description: "95th percentile latency is {{ $value }}s over the last 5 minutes."
+
+      - alert: APIHighMemoryUsage
+        expr: process_resident_memory_bytes{job="sgg-api"} > 1.5e9
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High memory usage"
+          description: "API memory usage is {{ $value | humanize }}B."
+
+  # ------------------------------------------
+  # Database Alerts
+  # ------------------------------------------
+  - name: database_health
+    interval: 30s
+    rules:
+      - alert: PostgreSQLDown
+        expr: up{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL database has been down for more than 1 minute."
+
+      - alert: PostgreSQLHighConnections
+        expr: pg_stat_database_numbackends > 80
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "High database connections"
+          description: "Database has {{ $value }} active connections."
+
+      - alert: PostgreSQLSlowQueries
+        expr: rate(pg_stat_statements_mean_time_seconds[5m]) > 1
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "Slow database queries detected"
+          description: "Average query time is {{ $value }}s."
+
+      - alert: PostgreSQLDiskSpaceLow
+        expr: pg_database_size_bytes / pg_settings_max_wal_size_bytes > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "Database disk space low"
+          description: "Database is using {{ $value | humanizePercentage }} of available space."
+
+  # ------------------------------------------
+  # Redis Alerts
+  # ------------------------------------------
+  - name: redis_health
+    interval: 30s
+    rules:
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: cache
+        annotations:
+          summary: "Redis is down"
+          description: "Redis cache has been down for more than 1 minute."
+
+      - alert: RedisHighMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          component: cache
+        annotations:
+          summary: "Redis memory usage high"
+          description: "Redis is using {{ $value | humanizePercentage }} of available memory."
+
+      - alert: RedisHighEvictionRate
+        expr: rate(redis_evicted_keys_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          component: cache
+        annotations:
+          summary: "High Redis eviction rate"
+          description: "Redis is evicting {{ $value }} keys per second."
+
+  # ------------------------------------------
+  # System Resource Alerts
+  # ------------------------------------------
+  - name: system_resources
+    interval: 30s
+    rules:
+      - alert: HighCPUUsage
+        expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}."
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}."
+
+      - alert: DiskSpaceLow
+        expr: (1 - (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"})) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "Disk space low"
+          description: "Disk usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}."
+
+  # ------------------------------------------
+  # Business Logic Alerts
+  # ------------------------------------------
+  - name: business_metrics
+    interval: 1m
+    rules:
+      - alert: HighFailedAuthAttempts
+        expr: rate(auth_failed_attempts_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          component: security
+        annotations:
+          summary: "High failed authentication attempts"
+          description: "There are {{ $value }} failed auth attempts per second."
+
+      - alert: EventProcessingBacklog
+        expr: event_queue_size > 1000
+        for: 10m
+        labels:
+          severity: warning
+          component: events
+        annotations:
+          summary: "Event processing backlog"
+          description: "Event queue has {{ $value }} pending events."
+
+      - alert: SyncServiceDown
+        expr: sync_service_healthy == 0
+        for: 5m
+        labels:
+          severity: warning
+          component: sync
+        annotations:
+          summary: "Sync service is unhealthy"
+          description: "Sync service has been unhealthy for 5 minutes."

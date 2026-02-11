@@ -1,0 +1,162 @@
+# ==========================================
+# ALERTMANAGER CONFIGURATION
+# ==========================================
+global:
+  resolve_timeout: 5m
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'alertmanager@sgg.com'
+  smtp_auth_username: '${ALERT_EMAIL_USER}'
+  smtp_auth_password: '${ALERT_EMAIL_PASSWORD}'
+  smtp_require_tls: true
+
+# Templates
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Alert routing
+route:
+  receiver: 'default'
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 12h
+
+  routes:
+    # Critical alerts - immediate notification
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 0s
+      repeat_interval: 5m
+
+    # Warning alerts - batched
+    - match:
+        severity: warning
+      receiver: 'warning-alerts'
+      group_wait: 30s
+      repeat_interval: 1h
+
+    # Database alerts
+    - match:
+        component: database
+      receiver: 'database-team'
+      group_wait: 15s
+
+    # Security alerts
+    - match:
+        component: security
+      receiver: 'security-team'
+      group_wait: 0s
+      repeat_interval: 30m
+
+    # Business alerts
+    - match_re:
+        component: '(events|sync)'
+      receiver: 'business-team'
+
+# Inhibition rules
+inhibit_rules:
+  # Inhibit warning if critical is firing for the same alert
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'instance']
+
+  # Inhibit all alerts if API is down
+  - source_match:
+      alertname: 'APIDown'
+    target_match_re:
+      alertname: '.*'
+    equal: ['instance']
+
+# Receivers
+receivers:
+  # ------------------------------------------
+  # Default receiver
+  # ------------------------------------------
+  - name: 'default'
+    email_configs:
+      - to: 'devops@sgg.com'
+        headers:
+          Subject: '[SGG Alert] {{ .GroupLabels.alertname }}'
+        html: |
+          <h2>Alert: {{ .GroupLabels.alertname }}</h2>
+          <p><b>Severity:</b> {{ .CommonLabels.severity }}</p>
+          <p><b>Summary:</b> {{ .CommonAnnotations.summary }}</p>
+          <p><b>Description:</b> {{ .CommonAnnotations.description }}</p>
+          <p><b>Environment:</b> {{ .CommonLabels.environment }}</p>
+          <p><b>Time:</b> {{ .StartsAt }}</p>
+
+  # ------------------------------------------
+  # Critical alerts (email + webhook)
+  # ------------------------------------------
+  - name: 'critical-alerts'
+    email_configs:
+      - to: 'oncall@sgg.com,devops@sgg.com'
+        headers:
+          Subject: '[CRITICAL] {{ .GroupLabels.alertname }}'
+        send_resolved: true
+        html: |
+          <h1 style="color: red;">🚨 CRITICAL ALERT</h1>
+          <h2>{{ .GroupLabels.alertname }}</h2>
+          <p><b>Summary:</b> {{ .CommonAnnotations.summary }}</p>
+          <p><b>Description:</b> {{ .CommonAnnotations.description }}</p>
+          <p><b>Component:</b> {{ .CommonLabels.component }}</p>
+          <p><b>Environment:</b> {{ .CommonLabels.environment }}</p>
+          <p><b>Started:</b> {{ .StartsAt }}</p>
+          {{ if .Resolved }}
+          <p style="color: green;"><b>RESOLVED at:</b> {{ .EndsAt }}</p>
+          {{ end }}
+
+    webhook_configs:
+      - url: 'http://api:3000/webhooks/alerts'
+        send_resolved: true
+        http_config:
+          bearer_token: '${WEBHOOK_TOKEN}'
+
+  # ------------------------------------------
+  # Warning alerts
+  # ------------------------------------------
+  - name: 'warning-alerts'
+    email_configs:
+      - to: 'devops@sgg.com'
+        headers:
+          Subject: '[Warning] {{ .GroupLabels.alertname }}'
+        send_resolved: true
+
+  # ------------------------------------------
+  # Database team
+  # ------------------------------------------
+  - name: 'database-team'
+    email_configs:
+      - to: 'database@sgg.com,devops@sgg.com'
+        headers:
+          Subject: '[Database] {{ .GroupLabels.alertname }}'
+        send_resolved: true
+
+  # ------------------------------------------
+  # Security team
+  # ------------------------------------------
+  - name: 'security-team'
+    email_configs:
+      - to: 'security@sgg.com,devops@sgg.com'
+        headers:
+          Subject: '[Security] {{ .GroupLabels.alertname }}'
+        send_resolved: true
+        html: |
+          <h2 style="color: orange;">⚠️ Security Alert</h2>
+          <h3>{{ .GroupLabels.alertname }}</h3>
+          <p><b>Summary:</b> {{ .CommonAnnotations.summary }}</p>
+          <p><b>Description:</b> {{ .CommonAnnotations.description }}</p>
+          <p><b>Time:</b> {{ .StartsAt }}</p>
+
+  # ------------------------------------------
+  # Business team
+  # ------------------------------------------
+  - name: 'business-team'
+    email_configs:
+      - to: 'business@sgg.com'
+        headers:
+          Subject: '[Business Alert] {{ .GroupLabels.alertname }}'
+        send_resolved: true

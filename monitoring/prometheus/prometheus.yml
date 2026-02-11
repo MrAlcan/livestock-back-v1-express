@@ -1,0 +1,77 @@
+# ==========================================
+# PROMETHEUS CONFIGURATION
+# ==========================================
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'sgg-production'
+    environment: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+# Load rules
+rule_files:
+  - 'alerts.yml'
+
+# Scrape configurations
+scrape_configs:
+  # ------------------------------------------
+  # Prometheus self-monitoring
+  # ------------------------------------------
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # ------------------------------------------
+  # API Application Metrics
+  # ------------------------------------------
+  - job_name: 'sgg-api'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['api:3000']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'sgg-api'
+
+  # ------------------------------------------
+  # PostgreSQL Metrics (via postgres_exporter)
+  # ------------------------------------------
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'sgg-postgres'
+
+  # ------------------------------------------
+  # Redis Metrics (via redis_exporter)
+  # ------------------------------------------
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'sgg-redis'
+
+  # ------------------------------------------
+  # Node Exporter (System Metrics)
+  # ------------------------------------------
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  # ------------------------------------------
+  # Nginx Metrics
+  # ------------------------------------------
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx:9113']
