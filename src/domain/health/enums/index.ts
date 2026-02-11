@@ -1,0 +1,36 @@
+export enum InventoryMovementType {
+  ENTRY = 'ENTRY',
+  EXIT = 'EXIT',
+  ADJUSTMENT = 'ADJUSTMENT',
+  LOSS = 'LOSS',
+}
+
+export enum TaskType {
+  VACCINATION = 'VACCINATION',
+  DEWORMING = 'DEWORMING',
+  TREATMENT = 'TREATMENT',
+  INSPECTION = 'INSPECTION',
+  OTHER = 'OTHER',
+}
+
+export enum TaskPriority {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+  URGENT = 'URGENT',
+}
+
+export enum TaskStatus {
+  PENDING = 'PENDING',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+}
+
+export enum RationType {
+  MAINTENANCE = 'MAINTENANCE',
+  GROWTH = 'GROWTH',
+  FATTENING = 'FATTENING',
+  GESTATION = 'GESTATION',
+  LACTATION = 'LACTATION',
+}
