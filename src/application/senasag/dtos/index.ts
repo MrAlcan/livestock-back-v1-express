@@ -1,0 +1,15 @@
+export {
+  CreateGMAInputDTO,
+  ApproveGMAInputDTO,
+  RejectGMAInputDTO,
+  MarkGMAInTransitInputDTO,
+  CloseGMAInputDTO,
+  AddAnimalToGMAInputDTO,
+  GMAFiltersInputDTO,
+  GMAResponseDTO,
+  GMAAnimalResponseDTO,
+  CreateRegulatoryDocumentInputDTO,
+  UpdateRegulatoryDocumentInputDTO,
+  RegulatoryDocumentResponseDTO,
+  ExpiringDocumentsResponseDTO,
+} from './SenasagDTOs';

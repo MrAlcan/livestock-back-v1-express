@@ -1,0 +1,1 @@
+export { EventManagementService } from './EventManagementService';

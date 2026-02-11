@@ -1,0 +1,18 @@
+export {
+  RegisterAnimalInputDTO,
+  UpdateAnimalInputDTO,
+  IdentifyAnimalInputDTO,
+  UpdateAnimalWeightInputDTO,
+  MarkAnimalAsDeadInputDTO,
+  MarkAnimalAsSoldInputDTO,
+  AssignAnimalToLotInputDTO,
+  AssignAnimalToPaddockInputDTO,
+  AnimalFiltersInputDTO,
+  AnimalResponseDTO,
+  CreateBreedInputDTO,
+  UpdateBreedInputDTO,
+  BreedResponseDTO,
+  GenealogyResponseDTO,
+  RecordGenealogyInputDTO,
+  InbreedingResultDTO,
+} from './AnimalDTOs';
