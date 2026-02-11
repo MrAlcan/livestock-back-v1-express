@@ -1,0 +1,802 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// AUTH MODULE
+// ==========================================
+
+model Farm {
+  id        String   @id @default(uuid())
+  name      String
+  code      String   @unique
+  status    String   @default("ACTIVE")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  users   User[]
+  animals Animal[]
+  lots    Lot[]
+  paddocks Paddock[]
+  gmas    GMA[]
+
+  @@map("farms")
+}
+
+model Role {
+  id          Int     @id @default(autoincrement())
+  code        String  @unique
+  name        String
+  description String?
+  accessLevel Int     @default(0) @map("access_level")
+  permissions Json    @default("{}")
+  isSystem    Boolean @default(false) @map("is_system")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  users           User[]
+  rolePermissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          Int     @id @default(autoincrement())
+  code        String  @unique
+  name        String
+  module      String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       Int        @map("role_id")
+  permissionId Int        @map("permission_id")
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  role       Role       @relation(fields: [roleId], references: [id])
+  permission Permission @relation(fields: [permissionId], references: [id])
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model User {
+  id              String    @id @default(uuid())
+  fullName        String    @map("full_name")
+  email           String    @unique
+  passwordHash    String    @map("password_hash")
+  roleId          Int       @map("role_id")
+  farmId          String    @map("farm_id")
+  phone           String?
+  avatarUrl       String?   @map("avatar_url")
+  status          String    @default("ACTIVE")
+  lastAccess      DateTime? @map("last_access")
+  lastAccessIp    String?   @map("last_access_ip")
+  preferences     Json      @default("{}")
+  recoveryToken   String?   @map("recovery_token")
+  tokenExpiration DateTime? @map("token_expiration")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
+
+  role          Role          @relation(fields: [roleId], references: [id])
+  farm          Farm          @relation(fields: [farmId], references: [id])
+  refreshTokens RefreshToken[]
+  auditLogs     AuditLog[]
+  events        Event[]
+
+  @@index([email])
+  @@index([farmId])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  revoked   Boolean  @default(false)
+  revokedAt DateTime? @map("revoked_at")
+  userAgent String?  @map("user_agent")
+  ipAddress String?  @map("ip_address")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([token])
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  action    String
+  tableName String   @map("table_name")
+  recordId  String   @map("record_id")
+  oldValues Json?    @map("old_values")
+  newValues Json?    @map("new_values")
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([tableName, recordId])
+  @@map("audit_logs")
+}
+
+// ==========================================
+// ANIMALS MODULE
+// ==========================================
+
+model Breed {
+  id                 Int     @id @default(autoincrement())
+  code               String  @unique
+  name               String
+  origin             String?
+  averageAdultWeight Float?  @map("average_adult_weight")
+  aptitude           String  @default("MEAT")
+  active             Boolean @default(true)
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  deletedAt          DateTime? @map("deleted_at")
+
+  animals Animal[]
+
+  @@map("breeds")
+}
+
+model Animal {
+  id                  String    @id @default(uuid())
+  officialId          String?   @unique @map("official_id")
+  temporaryId         String?   @map("temporary_id")
+  brandMark           String?   @map("brand_mark")
+  visualTag           String?   @map("visual_tag")
+  electronicId        String?   @unique @map("electronic_id")
+  sex                 String
+  birthDate           DateTime? @map("birth_date")
+  isEstimatedBirthDate Boolean  @default(false) @map("is_estimated_birth_date")
+  breedId             Int       @map("breed_id")
+  breedPercentage     Float?    @map("breed_percentage")
+  coatColor           String?   @map("coat_color")
+  status              String    @default("ACTIVE")
+  substatus           String?
+  exitDate            DateTime? @map("exit_date")
+  exitReason          String?   @map("exit_reason")
+  birthWeight         Float?    @map("birth_weight")
+  currentWeight       Float?    @map("current_weight")
+  lastWeighingDate    DateTime? @map("last_weighing_date")
+  motherId            String?   @map("mother_id")
+  fatherId            String?   @map("father_id")
+  currentLotId        String?   @map("current_lot_id")
+  currentPaddockId    String?   @map("current_paddock_id")
+  farmId              String    @map("farm_id")
+  origin              String    @default("BIRTH")
+  observations        String?
+  photoUrl            String?   @map("photo_url")
+  syncStatus          String    @default("SYNCED") @map("sync_status")
+  syncVersion         Int       @default(1) @map("sync_version")
+  deviceId            String?   @map("device_id")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  deletedAt           DateTime? @map("deleted_at")
+
+  breed          Breed    @relation(fields: [breedId], references: [id])
+  mother         Animal?  @relation("MotherChildren", fields: [motherId], references: [id])
+  father         Animal?  @relation("FatherChildren", fields: [fatherId], references: [id])
+  motherChildren Animal[] @relation("MotherChildren")
+  fatherChildren Animal[] @relation("FatherChildren")
+  currentLot     Lot?     @relation(fields: [currentLotId], references: [id])
+  currentPaddock Paddock? @relation(fields: [currentPaddockId], references: [id])
+  farm           Farm     @relation(fields: [farmId], references: [id])
+  events         Event[]
+  genealogiesAsAnimal Genealogy[] @relation("GenealogyAnimal")
+  genealogiesAsAncestor Genealogy[] @relation("GenealogyAncestor")
+  gmaAnimals     GMAAnimal[]
+
+  @@index([farmId])
+  @@index([currentLotId])
+  @@index([status])
+  @@map("animals")
+}
+
+model Genealogy {
+  id          String @id @default(uuid())
+  animalId    String @map("animal_id")
+  ancestorId  String @map("ancestor_id")
+  relationship String
+  generation  Int
+  coefficient Float  @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  animal   Animal @relation("GenealogyAnimal", fields: [animalId], references: [id])
+  ancestor Animal @relation("GenealogyAncestor", fields: [ancestorId], references: [id])
+
+  @@unique([animalId, ancestorId, relationship])
+  @@map("genealogies")
+}
+
+// ==========================================
+// EVENTS MODULE
+// ==========================================
+
+model EventType {
+  id             Int     @id @default(autoincrement())
+  code           String  @unique
+  name           String
+  category       String
+  icon           String?
+  color          String?
+  requiresDetail String? @map("requires_detail")
+  isSystem       Boolean @default(false) @map("is_system")
+  active         Boolean @default(true)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  events Event[]
+
+  @@map("event_types")
+}
+
+model Event {
+  id                     String    @id @default(uuid())
+  sequenceNumber         Int       @default(autoincrement()) @map("sequence_number")
+  animalId               String    @map("animal_id")
+  registeredBy           String    @map("registered_by")
+  eventDate              DateTime  @map("event_date")
+  localRegistrationDate  DateTime? @map("local_registration_date")
+  syncDate               DateTime? @map("sync_date")
+  eventType              String    @map("event_type")
+  eventCategory          String    @map("event_category")
+  eventTypeId            Int?      @map("event_type_id")
+  lotContext              String?   @map("lot_context")
+  paddockContext          String?   @map("paddock_context")
+  gpsLocation            String?   @map("gps_location")
+  deviceId               String?   @map("device_id")
+  offlineId              String?   @unique @map("offline_id")
+  isManual               Boolean   @default(true) @map("is_manual")
+  observations           String?
+  metadata               Json?
+  syncStatus             String    @default("SYNCED") @map("sync_status")
+  createdAt              DateTime  @default(now()) @map("created_at")
+
+  animal             Animal     @relation(fields: [animalId], references: [id])
+  user               User       @relation(fields: [registeredBy], references: [id])
+  eventType_rel      EventType? @relation(fields: [eventTypeId], references: [id])
+  weighingDetail     EventWeighingDetail?
+  healthDetail       EventHealthDetail?
+  movementDetail     EventMovementDetail?
+  reproductionDetail EventReproductionDetail?
+  birthDetail        EventBirthDetail?
+  deathDetail        EventDeathDetail?
+  identificationDetail EventIdentificationDetail?
+  weaningDetail      EventWeaningDetail?
+  purchaseDetail     EventPurchaseDetail?
+  saleDetail         EventSaleDetail?
+
+  @@index([animalId])
+  @@index([eventType])
+  @@index([eventDate])
+  @@map("events")
+}
+
+model EventWeighingDetail {
+  id           String  @id @default(uuid())
+  eventId      String  @unique @map("event_id")
+  weight       Float
+  weighingType String  @map("weighing_type")
+  condition    String?
+
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@map("event_weighing_details")
+}
+
+model EventHealthDetail {
+  id                  String  @id @default(uuid())
+  eventId             String  @unique @map("event_id")
+  productId           String? @map("product_id")
+  dosage              Float?
+  administrationRoute String? @map("administration_route")
+  treatmentResult     String? @map("treatment_result")
+  diagnosis           String?
+  withdrawalEndDate   DateTime? @map("withdrawal_end_date")
+
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@map("event_health_details")
+}
+
+model EventMovementDetail {
+  id             String  @id @default(uuid())
+  eventId        String  @unique @map("event_id")
+  movementType   String  @map("movement_type")
+  fromLotId      String? @map("from_lot_id")
+  toLotId        String? @map("to_lot_id")
+  fromPaddockId  String? @map("from_paddock_id")
+  toPaddockId    String? @map("to_paddock_id")
+  reason         String?
+
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@map("event_movement_details")
+}
+
+model EventReproductionDetail {
+  id              String    @id @default(uuid())
+  eventId         String    @unique @map("event_id")
+  serviceType     String?   @map("service_type")
+  bullId          String?   @map("bull_id")
+  semenCode       String?   @map("semen_code")
+  result          String?
+  diagnosisMethod String?   @map("diagnosis_method")
+  gestationDays   Int?      @map("gestation_days")
+  expectedBirthDate DateTime? @map("expected_birth_date")
+
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@map("event_reproduction_details")
+}
+
+model EventBirthDetail {
+  id             String  @id @default(uuid())
+  eventId        String  @unique @map("event_id")
+  birthType      String  @map("birth_type")
+  difficulty     String?
+  vitality       String?
+  offspringId    String? @map("offspring_id")
+  birthWeight    Float?  @map("birth_weight")
+
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@map("event_birth_details")
+}
+
+model EventDeathDetail {
+  id            String  @id @default(uuid())
+  eventId       String  @unique @map("event_id")
+  category      String
+  cause         String?
+  veterinaryReport String? @map("veterinary_report")
+  disposal      String?
+
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@map("event_death_details")
+}
+
+model EventIdentificationDetail {
+  id                 String  @id @default(uuid())
+  eventId            String  @unique @map("event_id")
+  identificationType String  @map("identification_type")
+  identificationValue String @map("identification_value")
+  previousValue      String? @map("previous_value")
+
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@map("event_identification_details")
+}
+
+model EventWeaningDetail {
+  id          String  @id @default(uuid())
+  eventId     String  @unique @map("event_id")
+  weaningType String  @map("weaning_type")
+  weight      Float?
+  ageInDays   Int?    @map("age_in_days")
+
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@map("event_weaning_details")
+}
+
+model EventPurchaseDetail {
+  id            String  @id @default(uuid())
+  eventId       String  @unique @map("event_id")
+  sellerId      String? @map("seller_id")
+  price         Float?
+  transportCost Float?  @map("transport_cost")
+  originFarm    String? @map("origin_farm")
+
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@map("event_purchase_details")
+}
+
+model EventSaleDetail {
+  id         String  @id @default(uuid())
+  eventId    String  @unique @map("event_id")
+  saleType   String  @map("sale_type")
+  buyerId    String? @map("buyer_id")
+  pricePerKg Float?  @map("price_per_kg")
+  totalPrice Float?  @map("total_price")
+  weight     Float?
+
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@map("event_sale_details")
+}
+
+// ==========================================
+// HEALTH MODULE
+// ==========================================
+
+model ProductType {
+  id                    Int     @id @default(autoincrement())
+  code                  String  @unique
+  name                  String
+  requiresStockControl  Boolean @default(true) @map("requires_stock_control")
+  requiresWithdrawal    Boolean @default(false) @map("requires_withdrawal")
+  defaultUnit           String  @default("ml") @map("default_unit")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  products Product[]
+
+  @@map("product_types")
+}
+
+model Product {
+  id                String    @id @default(uuid())
+  code              String    @unique
+  name              String
+  type              String
+  productTypeId     Int?      @map("product_type_id")
+  description       String?
+  manufacturer      String?
+  unit              String    @default("ml")
+  currentStock      Float     @default(0) @map("current_stock")
+  minimumStock      Float     @default(0) @map("minimum_stock")
+  batchNumber       String?   @map("batch_number")
+  expirationDate    DateTime? @map("expiration_date")
+  withdrawalDays    Int       @default(0) @map("withdrawal_days")
+  storageConditions String?   @map("storage_conditions")
+  active            Boolean   @default(true)
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  deletedAt         DateTime? @map("deleted_at")
+
+  productType        ProductType?        @relation(fields: [productTypeId], references: [id])
+  inventoryMovements InventoryMovement[]
+  rationIngredients  RationIngredient[]
+
+  @@index([type])
+  @@map("products")
+}
+
+model InventoryMovement {
+  id           String   @id @default(uuid())
+  productId    String   @map("product_id")
+  type         String
+  quantity     Float
+  previousStock Float   @map("previous_stock")
+  newStock     Float    @map("new_stock")
+  reason       String?
+  reference    String?
+  registeredBy String   @map("registered_by")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+  @@map("inventory_movements")
+}
+
+model HealthTask {
+  id            String    @id @default(uuid())
+  code          String    @unique
+  name          String
+  type          String
+  priority      String    @default("MEDIUM")
+  status        String    @default("PENDING")
+  description   String?
+  productId     String?   @map("product_id")
+  dosagePerAnimal Float?  @map("dosage_per_animal")
+  assignedTo    String?   @map("assigned_to")
+  scheduledDate DateTime  @map("scheduled_date")
+  completedDate DateTime? @map("completed_date")
+  farmId        String    @map("farm_id")
+  observations  String?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  deletedAt     DateTime? @map("deleted_at")
+
+  lots HealthTaskLot[]
+
+  @@index([status])
+  @@index([scheduledDate])
+  @@map("health_tasks")
+}
+
+model HealthTaskLot {
+  taskId String @map("task_id")
+  lotId  String @map("lot_id")
+
+  task HealthTask @relation(fields: [taskId], references: [id])
+
+  @@id([taskId, lotId])
+  @@map("health_task_lots")
+}
+
+model Ration {
+  id            String  @id @default(uuid())
+  code          String
+  name          String
+  type          String
+  description   String?
+  costPerKg     Float   @default(0) @map("cost_per_kg")
+  active        Boolean @default(true)
+  farmId        String  @map("farm_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  deletedAt     DateTime? @map("deleted_at")
+
+  ingredients RationIngredient[]
+
+  @@unique([code, farmId])
+  @@map("rations")
+}
+
+model RationIngredient {
+  id           String @id @default(uuid())
+  rationId     String @map("ration_id")
+  productId    String @map("product_id")
+  percentage   Float
+  quantityPerKg Float @map("quantity_per_kg")
+
+  ration  Ration  @relation(fields: [rationId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("ration_ingredients")
+}
+
+// ==========================================
+// LOTS MODULE
+// ==========================================
+
+model Lot {
+  id            String    @id @default(uuid())
+  code          String
+  name          String
+  type          String    @default("FATTENING")
+  status        String    @default("ACTIVE")
+  description   String?
+  currentQuantity Int     @default(0) @map("current_quantity")
+  maxCapacity   Int?      @map("max_capacity")
+  averageWeight Float?    @map("average_weight")
+  farmId        String    @map("farm_id")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  deletedAt     DateTime? @map("deleted_at")
+
+  farm    Farm     @relation(fields: [farmId], references: [id])
+  animals Animal[]
+
+  @@unique([code, farmId])
+  @@index([farmId])
+  @@map("lots")
+}
+
+model Paddock {
+  id              String    @id @default(uuid())
+  code            String
+  name            String
+  areaHectares    Float?    @map("area_hectares")
+  pastureType     String?   @map("pasture_type")
+  pastureCondition String?  @map("pasture_condition")
+  waterSource     Boolean   @default(false) @map("water_source")
+  currentCapacity Int       @default(0) @map("current_capacity")
+  maxCapacity     Int?      @map("max_capacity")
+  gpsCoordinates  String?   @map("gps_coordinates")
+  status          String    @default("ACTIVE")
+  farmId          String    @map("farm_id")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
+
+  farm    Farm     @relation(fields: [farmId], references: [id])
+  animals Animal[]
+
+  @@unique([code, farmId])
+  @@index([farmId])
+  @@map("paddocks")
+}
+
+// ==========================================
+// SENASAG MODULE
+// ==========================================
+
+model GMA {
+  id              String    @id @default(uuid())
+  gmaCode         String?   @unique @map("gma_code")
+  internalNumber  String    @unique @map("internal_number")
+  type            String
+  status          String    @default("DRAFT")
+  originFarmId    String    @map("origin_farm_id")
+  destinationFarm String?   @map("destination_farm")
+  transporterId   String?   @map("transporter_id")
+  issueDate       DateTime? @map("issue_date")
+  expirationDate  DateTime? @map("expiration_date")
+  observations    String?
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  farm     Farm        @relation(fields: [originFarmId], references: [id])
+  animals  GMAAnimal[]
+
+  @@index([originFarmId])
+  @@index([status])
+  @@map("gmas")
+}
+
+model GMAAnimal {
+  id       String  @id @default(uuid())
+  gmaId    String  @map("gma_id")
+  animalId String  @map("animal_id")
+  weight   Float?
+
+  gma    GMA    @relation(fields: [gmaId], references: [id])
+  animal Animal @relation(fields: [animalId], references: [id])
+
+  @@unique([gmaId, animalId])
+  @@map("gma_animals")
+}
+
+model RegulatoryDocument {
+  id             String    @id @default(uuid())
+  type           String
+  documentNumber String?   @map("document_number")
+  status         String    @default("VALID")
+  farmId         String    @map("farm_id")
+  issueDate      DateTime? @map("issue_date")
+  expirationDate DateTime? @map("expiration_date")
+  issuingAuthority String? @map("issuing_authority")
+  fileUrl        String?   @map("file_url")
+  observations   String?
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  deletedAt      DateTime? @map("deleted_at")
+
+  @@index([farmId])
+  @@index([type])
+  @@map("regulatory_documents")
+}
+
+// ==========================================
+// FINANCE MODULE
+// ==========================================
+
+model FinancialCategory {
+  id        Int     @id @default(autoincrement())
+  code      String  @unique
+  name      String
+  type      String
+  parentId  Int?    @map("parent_id")
+  level     Int     @default(1)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  parent   FinancialCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children FinancialCategory[] @relation("CategoryHierarchy")
+  movements FinancialMovement[]
+
+  @@map("financial_categories")
+}
+
+model ThirdParty {
+  id           String    @id @default(uuid())
+  code         String    @unique
+  name         String
+  type         String
+  idType       String?   @map("id_type")
+  taxId        String?   @unique @map("tax_id")
+  phone        String?
+  email        String?
+  address      String?
+  city         String?
+  balance      Float     @default(0)
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+
+  movements FinancialMovement[]
+
+  @@map("third_parties")
+}
+
+model FinancialMovement {
+  id              String    @id @default(uuid())
+  voucherNumber   String?   @unique @map("voucher_number")
+  type            String
+  categoryId      Int       @map("category_id")
+  thirdPartyId    String?   @map("third_party_id")
+  amount          Float
+  tax             Float     @default(0)
+  totalAmount     Float     @map("total_amount")
+  paymentMethod   String?   @map("payment_method")
+  status          String    @default("PENDING")
+  description     String?
+  lotId           String?   @map("lot_id")
+  animalId        String?   @map("animal_id")
+  movementDate    DateTime  @map("movement_date")
+  dueDate         DateTime? @map("due_date")
+  paidDate        DateTime? @map("paid_date")
+  farmId          String    @map("farm_id")
+  registeredBy    String    @map("registered_by")
+  approvedBy      String?   @map("approved_by")
+  observations    String?
+  attachmentUrl   String?   @map("attachment_url")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
+
+  category   FinancialCategory @relation(fields: [categoryId], references: [id])
+  thirdParty ThirdParty?       @relation(fields: [thirdPartyId], references: [id])
+
+  @@index([type])
+  @@index([farmId])
+  @@index([movementDate])
+  @@map("financial_movements")
+}
+
+// ==========================================
+// SYNC MODULE
+// ==========================================
+
+model SyncLog {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  deviceId        String   @map("device_id")
+  status          String   @default("STARTED")
+  startTime       DateTime @map("start_time")
+  endTime         DateTime? @map("end_time")
+  recordsSent     Int      @default(0) @map("records_sent")
+  recordsReceived Int      @default(0) @map("records_received")
+  conflictsFound  Int      @default(0) @map("conflicts_found")
+  conflictsResolved Int    @default(0) @map("conflicts_resolved")
+  errorMessage    String?  @map("error_message")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  conflicts ConflictResolution[]
+
+  @@index([userId])
+  @@index([deviceId])
+  @@map("sync_logs")
+}
+
+model ConflictResolution {
+  id              String    @id @default(uuid())
+  syncLogId       String    @map("sync_log_id")
+  tableName       String    @map("table_name")
+  recordId        String    @map("record_id")
+  conflictType    String    @map("conflict_type")
+  localData       Json      @map("local_data")
+  serverData      Json      @map("server_data")
+  resolvedData    Json?     @map("resolved_data")
+  strategy        String
+  resolvedBy      String?   @map("resolved_by")
+  resolvedAt      DateTime? @map("resolved_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  syncLog SyncLog @relation(fields: [syncLogId], references: [id])
+
+  @@index([syncLogId])
+  @@map("conflict_resolutions")
+}
