@@ -1,0 +1,174 @@
+version: '3.9'
+
+# ==========================================
+# DEVELOPMENT ENVIRONMENT
+# ==========================================
+services:
+
+  # ------------------------------------------
+  # API (Backend)
+  # ------------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: build
+    container_name: sgg-api-dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://sgg_user:sgg_password@localhost:5432/sgg_dev?schema=public
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_ACCESS_SECRET=dev-secret-not-for-production-32chars
+      - JWT_REFRESH_SECRET=dev-refresh-secret-not-for-prod-32chars
+      - ENCRYPTION_SECRET=dev-encryption-secret-32-chars
+      - LOG_LEVEL=debug
+      - STORAGE_PROVIDER=local
+      - STORAGE_LOCAL_PATH=/app/uploads
+    volumes:
+      - ./src:/app/src
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - sgg-network
+    command: npm run dev
+
+  # ------------------------------------------
+  # PostgreSQL (Database)
+  # ------------------------------------------
+  postgres:
+    image: postgres:14-alpine
+    container_name: sgg-postgres-dev
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=sgg_user
+      - POSTGRES_PASSWORD=sgg_password
+      - POSTGRES_DB=sgg_dev
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sgg_user -d sgg_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sgg-network
+
+  # ------------------------------------------
+  # Redis (Cache)
+  # ------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: sgg-redis-dev
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sgg-network
+
+  # ------------------------------------------
+  # Prometheus (Monitoring)
+  # ------------------------------------------
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: sgg-prometheus-dev
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+    networks:
+      - sgg-network
+
+  # ------------------------------------------
+  # Grafana (Dashboards)
+  # ------------------------------------------
+  grafana:
+    image: grafana/grafana:latest
+    container_name: sgg-grafana-dev
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_INSTALL_PLUGINS=
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      - prometheus
+    networks:
+      - sgg-network
+
+  # ------------------------------------------
+  # Loki (Log Aggregation)
+  # ------------------------------------------
+  loki:
+    image: grafana/loki:latest
+    container_name: sgg-loki-dev
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki/loki-config.yml:/etc/loki/local-config.yaml
+      - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - sgg-network
+
+  # ------------------------------------------
+  # Promtail (Log Collector)
+  # ------------------------------------------
+  promtail:
+    image: grafana/promtail:latest
+    container_name: sgg-promtail-dev
+    volumes:
+      - ./logs:/var/log/sgg
+      - ./monitoring/promtail/promtail-config.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    networks:
+      - sgg-network
+
+# ==========================================
+# VOLUMES (Persistent Data)
+# ==========================================
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  loki-data:
+    driver: local
+
+# ==========================================
+# NETWORKS
+# ==========================================
+networks:
+  sgg-network:
+    driver: bridge
