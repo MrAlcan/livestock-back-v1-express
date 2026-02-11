@@ -1,0 +1,1 @@
+export { InbreedingCalculatorService } from './InbreedingCalculatorService';

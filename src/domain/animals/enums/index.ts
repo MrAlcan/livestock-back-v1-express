@@ -1,0 +1,46 @@
+export enum AnimalSex {
+  MALE = 'MALE',
+  FEMALE = 'FEMALE',
+}
+
+export enum AnimalStatus {
+  ACTIVE = 'ACTIVE',
+  DEAD = 'DEAD',
+  SOLD = 'SOLD',
+  TRANSFERRED = 'TRANSFERRED',
+}
+
+export enum AnimalOrigin {
+  BIRTH = 'BIRTH',
+  PURCHASE = 'PURCHASE',
+  TRANSFER = 'TRANSFER',
+}
+
+export enum BreedAptitude {
+  MEAT = 'MEAT',
+  MILK = 'MILK',
+  DUAL_PURPOSE = 'DUAL_PURPOSE',
+}
+
+export enum RelationType {
+  FATHER = 'FATHER',
+  MOTHER = 'MOTHER',
+  PATERNAL_GRANDFATHER = 'PATERNAL_GRANDFATHER',
+  PATERNAL_GRANDMOTHER = 'PATERNAL_GRANDMOTHER',
+  MATERNAL_GRANDFATHER = 'MATERNAL_GRANDFATHER',
+  MATERNAL_GRANDMOTHER = 'MATERNAL_GRANDMOTHER',
+  OTHER = 'OTHER',
+}
+
+export enum SyncStatus {
+  SYNCED = 'SYNCED',
+  PENDING = 'PENDING',
+  CONFLICT = 'CONFLICT',
+}
+
+export enum IdentifierType {
+  OFFICIAL = 'OFFICIAL',
+  ELECTRONIC = 'ELECTRONIC',
+  VISUAL = 'VISUAL',
+  TEMPORARY = 'TEMPORARY',
+}
