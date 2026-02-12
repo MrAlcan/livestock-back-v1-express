@@ -43,7 +43,7 @@ export class PrismaFinancialMovementRepository
         where,
         skip: pagination.offset,
         take: pagination.limit,
-        orderBy: { date: 'desc' },
+        orderBy: { movementDate: 'desc' },
       });
       return records.map((r: any) => this.toDomain(r));
     } catch (error) {
@@ -110,7 +110,7 @@ export class PrismaFinancialMovementRepository
     try {
       const records = await (this.prisma as any).financialMovement.findMany({
         where: { status: FinancialStatus.PENDING },
-        orderBy: { date: 'desc' },
+        orderBy: { movementDate: 'desc' },
       });
       return records.map((r: any) => this.toDomain(r));
     } catch (error) {
@@ -165,7 +165,7 @@ export class PrismaFinancialMovementRepository
       const dateFilter: Record<string, Date> = {};
       if (filters.startDate) dateFilter.gte = filters.startDate;
       if (filters.endDate) dateFilter.lte = filters.endDate;
-      where.date = dateFilter;
+      where.movementDate = dateFilter;
     }
     if (filters.search) {
       where.OR = [
@@ -187,9 +187,9 @@ export class PrismaFinancialMovementRepository
       currency: movement.currency,
       exchangeRate: movement.exchangeRate,
       baseAmount: movement.baseAmount,
-      date: movement.date,
+      movementDate: movement.date,
       dueDate: movement.dueDate,
-      paymentDate: movement.paymentDate,
+      paidDate: movement.paymentDate,
       paymentMethod: movement.paymentMethod,
       description: movement.description,
       thirdPartyId: movement.thirdPartyId?.value,
@@ -219,9 +219,9 @@ export class PrismaFinancialMovementRepository
         currency: record.currency,
         exchangeRate: record.exchangeRate ?? undefined,
         baseAmount: record.baseAmount ?? undefined,
-        date: new Date(record.date),
+        date: new Date(record.movementDate),
         dueDate: record.dueDate ? new Date(record.dueDate) : undefined,
-        paymentDate: record.paymentDate ? new Date(record.paymentDate) : undefined,
+        paymentDate: record.paidDate ? new Date(record.paidDate) : undefined,
         paymentMethod: record.paymentMethod ? (record.paymentMethod as PaymentMethod) : undefined,
         description: record.description,
         thirdPartyId: record.thirdPartyId ? new UniqueId(record.thirdPartyId) : undefined,

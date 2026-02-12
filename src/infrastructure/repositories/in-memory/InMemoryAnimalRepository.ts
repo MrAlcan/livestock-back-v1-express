@@ -103,7 +103,7 @@ export class InMemoryAnimalRepository implements IAnimalRepository {
       result = result.filter((a) => a.sex === filters.sex);
     }
     if (filters.breedId) {
-      result = result.filter((a) => a.breedId?.value === filters.breedId);
+      result = result.filter((a) => a.breedId === filters.breedId);
     }
     if (filters.origin) {
       result = result.filter((a) => a.origin === filters.origin);

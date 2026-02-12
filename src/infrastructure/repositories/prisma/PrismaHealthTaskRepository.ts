@@ -43,7 +43,7 @@ export class PrismaHealthTaskRepository
         where,
         skip: pagination.offset,
         take: pagination.limit,
-        orderBy: { dueDate: 'asc' },
+        orderBy: { scheduledDate: 'asc' },
       });
       return records.map((r: any) => this.toDomain(r));
     } catch (error) {

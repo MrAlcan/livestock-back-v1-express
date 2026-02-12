@@ -31,7 +31,7 @@ export class PrismaSyncLogRepository
         where: { deviceId },
         skip: pagination.offset,
         take: pagination.limit,
-        orderBy: { startDate: 'desc' },
+        orderBy: { startTime: 'desc' },
       });
       return records.map((r: any) => this.toDomain(r));
     } catch (error) {
@@ -45,7 +45,7 @@ export class PrismaSyncLogRepository
         where: { userId: userId.value },
         skip: pagination.offset,
         take: pagination.limit,
-        orderBy: { startDate: 'desc' },
+        orderBy: { startTime: 'desc' },
       });
       return records.map((r: any) => this.toDomain(r));
     } catch (error) {
@@ -57,7 +57,7 @@ export class PrismaSyncLogRepository
     try {
       const records = await (this.prisma as any).syncLog.findMany({
         where: { status: SyncLogStatus.ERROR },
-        orderBy: { startDate: 'desc' },
+        orderBy: { startTime: 'desc' },
       });
       return records.map((r: any) => this.toDomain(r));
     } catch (error) {
@@ -72,16 +72,14 @@ export class PrismaSyncLogRepository
           id: log.id.value,
           deviceId: log.deviceId,
           userId: log.userId.value,
-          startDate: log.startDate,
-          endDate: log.endDate,
+          startTime: log.startDate,
+          endTime: log.endDate,
           status: log.status,
-          uploadedRecords: log.uploadedRecords,
-          downloadedRecords: log.downloadedRecords,
-          conflictRecords: log.conflictRecords,
-          conflicts: log.conflicts,
+          recordsSent: log.uploadedRecords ?? 0,
+          recordsReceived: log.downloadedRecords ?? 0,
+          conflictsFound: log.conflictRecords ?? 0,
+          conflictsResolved: 0,
           errorMessage: log.errorMessage,
-          durationSeconds: log.durationSeconds,
-          deviceMetadata: log.deviceMetadata,
           createdAt: log.createdAt,
         },
       });
@@ -96,14 +94,12 @@ export class PrismaSyncLogRepository
       const record = await (this.prisma as any).syncLog.update({
         where: { id: log.id.value },
         data: {
-          endDate: log.endDate,
+          endTime: log.endDate,
           status: log.status,
-          uploadedRecords: log.uploadedRecords,
-          downloadedRecords: log.downloadedRecords,
-          conflictRecords: log.conflictRecords,
-          conflicts: log.conflicts,
+          recordsSent: log.uploadedRecords ?? 0,
+          recordsReceived: log.downloadedRecords ?? 0,
+          conflictsFound: log.conflictRecords ?? 0,
           errorMessage: log.errorMessage,
-          durationSeconds: log.durationSeconds,
         },
       });
       return this.toDomain(record);
@@ -117,16 +113,16 @@ export class PrismaSyncLogRepository
       {
         deviceId: record.deviceId,
         userId: new UniqueId(record.userId),
-        startDate: new Date(record.startDate),
-        endDate: record.endDate ? new Date(record.endDate) : undefined,
+        startDate: new Date(record.startTime),
+        endDate: record.endTime ? new Date(record.endTime) : undefined,
         status: record.status as SyncLogStatus,
-        uploadedRecords: record.uploadedRecords ?? undefined,
-        downloadedRecords: record.downloadedRecords ?? undefined,
-        conflictRecords: record.conflictRecords ?? undefined,
-        conflicts: record.conflicts ?? undefined,
+        uploadedRecords: record.recordsSent ?? undefined,
+        downloadedRecords: record.recordsReceived ?? undefined,
+        conflictRecords: record.conflictsFound ?? undefined,
+        conflicts: undefined,
         errorMessage: record.errorMessage ?? undefined,
-        durationSeconds: record.durationSeconds ?? undefined,
-        deviceMetadata: record.deviceMetadata ?? undefined,
+        durationSeconds: undefined,
+        deviceMetadata: undefined,
       },
       new UniqueId(record.id),
       new Date(record.createdAt),

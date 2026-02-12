@@ -17,7 +17,7 @@ export class PrismaGMARepository
 
   async findById(id: UniqueId): Promise<GMA | null> {
     try {
-      const record = await (this.prisma as any).gma.findUnique({
+      const record = await (this.prisma as any).gMA.findUnique({
         where: { id: id.value },
       });
       return record ? this.toDomain(record) : null;
@@ -28,7 +28,7 @@ export class PrismaGMARepository
 
   async findByInternalNumber(internalNumber: string): Promise<GMA | null> {
     try {
-      const record = await (this.prisma as any).gma.findFirst({
+      const record = await (this.prisma as any).gMA.findFirst({
         where: { internalNumber },
       });
       return record ? this.toDomain(record) : null;
@@ -39,7 +39,7 @@ export class PrismaGMARepository
 
   async findByGMACode(gmaCode: string): Promise<GMA | null> {
     try {
-      const record = await (this.prisma as any).gma.findFirst({
+      const record = await (this.prisma as any).gMA.findFirst({
         where: { gmaCode },
       });
       return record ? this.toDomain(record) : null;
@@ -51,11 +51,11 @@ export class PrismaGMARepository
   async findAll(filters: GMAFilters, pagination: Pagination): Promise<GMA[]> {
     try {
       const where = this.buildFilters(filters);
-      const records = await (this.prisma as any).gma.findMany({
+      const records = await (this.prisma as any).gMA.findMany({
         where,
         skip: pagination.offset,
         take: pagination.limit,
-        orderBy: { requestDate: 'desc' },
+        orderBy: { issueDate: 'desc' },
       });
       return records.map((r: any) => this.toDomain(r));
     } catch (error) {
@@ -69,9 +69,9 @@ export class PrismaGMARepository
         originFarmId: farmId.value,
         ...this.buildFilters(filters),
       };
-      const records = await (this.prisma as any).gma.findMany({
+      const records = await (this.prisma as any).gMA.findMany({
         where,
-        orderBy: { requestDate: 'desc' },
+        orderBy: { issueDate: 'desc' },
       });
       return records.map((r: any) => this.toDomain(r));
     } catch (error) {
@@ -81,9 +81,9 @@ export class PrismaGMARepository
 
   async findPendingApproval(): Promise<GMA[]> {
     try {
-      const records = await (this.prisma as any).gma.findMany({
+      const records = await (this.prisma as any).gMA.findMany({
         where: { status: GMAStatus.PENDING_APPROVAL },
-        orderBy: { requestDate: 'asc' },
+        orderBy: { issueDate: 'asc' },
       });
       return records.map((r: any) => this.toDomain(r));
     } catch (error) {
@@ -93,7 +93,7 @@ export class PrismaGMARepository
 
   async findInTransit(): Promise<GMA[]> {
     try {
-      const records = await (this.prisma as any).gma.findMany({
+      const records = await (this.prisma as any).gMA.findMany({
         where: { status: GMAStatus.IN_TRANSIT },
         orderBy: { actualDepartureDate: 'desc' },
       });
@@ -105,7 +105,7 @@ export class PrismaGMARepository
 
   async create(gma: GMA): Promise<GMA> {
     try {
-      const record = await (this.prisma as any).gma.create({
+      const record = await (this.prisma as any).gMA.create({
         data: this.toData(gma),
       });
       return this.toDomain(record);
@@ -119,7 +119,7 @@ export class PrismaGMARepository
       const data = this.toData(gma);
       delete data.id;
       delete data.createdAt;
-      const record = await (this.prisma as any).gma.update({
+      const record = await (this.prisma as any).gMA.update({
         where: { id: gma.id.value },
         data,
       });
@@ -131,7 +131,7 @@ export class PrismaGMARepository
 
   async addAnimal(gmaId: UniqueId, animalId: UniqueId, weight?: Weight): Promise<void> {
     try {
-      await (this.prisma as any).gmaAnimal.create({
+      await (this.prisma as any).gMAAnimal.create({
         data: {
           gmaId: gmaId.value,
           animalId: animalId.value,
@@ -145,7 +145,7 @@ export class PrismaGMARepository
 
   async removeAnimal(gmaId: UniqueId, animalId: UniqueId): Promise<void> {
     try {
-      await (this.prisma as any).gmaAnimal.deleteMany({
+      await (this.prisma as any).gMAAnimal.deleteMany({
         where: {
           gmaId: gmaId.value,
           animalId: animalId.value,
@@ -164,7 +164,7 @@ export class PrismaGMARepository
       const dateFilter: Record<string, Date> = {};
       if (filters.startDate) dateFilter.gte = filters.startDate;
       if (filters.endDate) dateFilter.lte = filters.endDate;
-      where.requestDate = dateFilter;
+      where.issueDate = dateFilter;
     }
     if (filters.search) {
       where.OR = [
@@ -186,7 +186,6 @@ export class PrismaGMARepository
       transporterId: gma.transporterId.value,
       destinationId: gma.destinationId.value,
       type: gma.type,
-      requestDate: gma.requestDate,
       issueDate: gma.issueDate,
       expirationDate: gma.expirationDate,
       actualDepartureDate: gma.actualDepartureDate,
@@ -218,7 +217,6 @@ export class PrismaGMARepository
         transporterId: new UniqueId(record.transporterId),
         destinationId: new UniqueId(record.destinationId),
         type: record.type as GMAType,
-        requestDate: new Date(record.requestDate),
         issueDate: record.issueDate ? new Date(record.issueDate) : undefined,
         expirationDate: record.expirationDate ? new Date(record.expirationDate) : undefined,
         actualDepartureDate: record.actualDepartureDate ? new Date(record.actualDepartureDate) : undefined,

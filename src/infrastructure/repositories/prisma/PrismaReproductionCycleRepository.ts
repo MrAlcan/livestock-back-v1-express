@@ -15,11 +15,9 @@ export class PrismaReproductionCycleRepository
 
   async findByFemale(femaleId: UniqueId): Promise<ReproductionCycle[]> {
     try {
-      const records = await (this.prisma as any).reproductionCycle.findMany({
-        where: this.buildWhereWithSoftDelete({ femaleId: femaleId.value }),
-        orderBy: { serviceDate: 'desc' },
-      });
-      return records.map((r: any) => this.toDomain(r));
+      // TODO: Implement using Event and EventReproductionDetail tables
+      // For now, return empty array as the reproductionCycle table doesn't exist
+      return [];
     } catch (error) {
       this.handlePrismaError(error);
     }
@@ -27,14 +25,9 @@ export class PrismaReproductionCycleRepository
 
   async findActiveCycles(farmId: UniqueId): Promise<ReproductionCycle[]> {
     try {
-      const records = await (this.prisma as any).reproductionCycle.findMany({
-        where: this.buildWhereWithSoftDelete({
-          animal: { farmId: farmId.value },
-          result: { in: [ReproductionResult.SERVICED, ReproductionResult.PREGNANT] },
-        }),
-        include: { animal: true },
-      });
-      return records.map((r: any) => this.toDomain(r));
+      // TODO: Implement using Event and EventReproductionDetail tables
+      // For now, return empty array as the reproductionCycle table doesn't exist
+      return [];
     } catch (error) {
       this.handlePrismaError(error);
     }
@@ -42,12 +35,9 @@ export class PrismaReproductionCycleRepository
 
   async findByDateRange(startDate: Date, endDate: Date): Promise<ReproductionCycle[]> {
     try {
-      const records = await (this.prisma as any).reproductionCycle.findMany({
-        where: this.buildWhereWithSoftDelete({
-          serviceDate: { gte: startDate, lte: endDate },
-        }),
-      });
-      return records.map((r: any) => this.toDomain(r));
+      // TODO: Implement using Event and EventReproductionDetail tables
+      // For now, return empty array as the reproductionCycle table doesn't exist
+      return [];
     } catch (error) {
       this.handlePrismaError(error);
     }
