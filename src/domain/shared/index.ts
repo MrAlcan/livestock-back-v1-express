@@ -4,4 +4,5 @@ export { DomainEvent } from './DomainEvent';
 export { DomainError } from './DomainError';
 export { AggregateRoot } from './AggregateRoot';
 export { Result } from './Result';
-export { Pagination, DateRange, createPagination, createDateRange, dateRangeContains } from './Pagination';
+export type { Pagination, DateRange } from './Pagination';
+export { createPagination, createDateRange, dateRangeContains } from './Pagination';

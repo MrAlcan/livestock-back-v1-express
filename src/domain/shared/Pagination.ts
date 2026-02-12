@@ -14,10 +14,10 @@ export function createPagination(page: number = 1, limit: number = 20): Paginati
   };
 }
 
-export interface DateRange {
+export type DateRange = {
   readonly startDate: Date;
   readonly endDate: Date;
-}
+};
 
 export function createDateRange(startDate: Date, endDate: Date): DateRange {
   if (endDate < startDate) {
