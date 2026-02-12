@@ -13,7 +13,6 @@ export class GMAMapper {
       transporterId: gma.transporterId.value,
       destinationId: gma.destinationId.value,
       type: gma.type,
-      requestDate: gma.requestDate.toISOString(),
       issueDate: gma.issueDate?.toISOString(),
       expirationDate: gma.expirationDate?.toISOString(),
       actualDepartureDate: gma.actualDepartureDate?.toISOString(),

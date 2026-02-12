@@ -68,7 +68,6 @@ export interface GMAResponseDTO {
   readonly transporterId: string;
   readonly destinationId: string;
   readonly type: string;
-  readonly requestDate: string;
   readonly issueDate?: string;
   readonly expirationDate?: string;
   readonly actualDepartureDate?: string;
