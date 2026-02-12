@@ -31,7 +31,6 @@ export function createAnimalRoutes(
   router.get('/active', auth, animalController.getActiveAnimals);
   router.get('/search', auth, animalController.searchAnimals);
   router.get('/by-lot/:lotId', auth, animalController.getAnimalsByLot);
-  router.get('/:id', auth, validateParams(uuidParamSchema), animalController.getAnimalDetails);
   router.put('/:id', auth, validate(updateAnimalSchema), animalController.updateAnimal);
   router.patch('/:id/identify', auth, validate(identifyAnimalSchema), animalController.identifyAnimal);
   router.patch('/:id/weight', auth, validate(updateWeightSchema), animalController.updateWeight);
@@ -45,14 +44,18 @@ export function createAnimalRoutes(
   router.post('/breeds', auth, rbac(['PROPIETARIO', 'TECNICO']), validate(createBreedSchema), breedController.createBreed);
   router.put('/breeds/:id', auth, rbac(['PROPIETARIO', 'TECNICO']), validate(updateBreedSchema), breedController.updateBreed);
   router.delete('/breeds/:id', auth, rbac(['PROPIETARIO']), breedController.deleteBreed);
-  router.get('/breeds/:id', auth, breedController.getBreedDetails);
   router.get('/breeds', auth, breedController.listBreeds);
+  router.get('/breeds/:id', auth, breedController.getBreedDetails);
 
   // ─── Genealogy sub-routes ──────────────────────────────────────────
 
   router.post('/genealogy', auth, validate(recordGenealogySchema), genealogyController.recordGenealogy);
   router.get('/genealogy/:animalId', auth, genealogyController.getGenealogyTree);
   router.get('/genealogy/:animalId/inbreeding', auth, genealogyController.calculateInbreeding);
+
+  // ─── Animal by ID (must be last to avoid matching specific routes) ─
+
+  router.get('/:id', auth, validateParams(uuidParamSchema), animalController.getAnimalDetails);
 
   return router;
 }

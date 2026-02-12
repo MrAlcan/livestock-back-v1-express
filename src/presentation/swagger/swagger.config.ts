@@ -356,6 +356,81 @@ export const swaggerSpec: SwaggerDefinition & { paths: any } = {
         },
       },
     },
+    '/health/products': {
+      get: {
+        tags: ['Health'],
+        summary: 'Listar productos veterinarios',
+        responses: { '200': { description: 'Lista de productos' } },
+      },
+      post: {
+        tags: ['Health'],
+        summary: 'Crear producto veterinario',
+        responses: { '201': { description: 'Producto creado' } },
+      },
+    },
+    '/health/products/{id}': {
+      get: {
+        tags: ['Health'],
+        summary: 'Obtener detalles de producto',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'Detalles del producto' } },
+      },
+      put: {
+        tags: ['Health'],
+        summary: 'Actualizar producto',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'Producto actualizado' } },
+      },
+    },
+    '/health/products/{id}/deactivate': {
+      patch: {
+        tags: ['Health'],
+        summary: 'Desactivar producto',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'Producto desactivado' } },
+      },
+    },
+    '/health/products/low-stock': {
+      get: {
+        tags: ['Health'],
+        summary: 'Productos con bajo inventario',
+        responses: { '200': { description: 'Lista de productos con bajo stock' } },
+      },
+    },
+    '/health/products/{id}/stock': {
+      get: {
+        tags: ['Health'],
+        summary: 'Verificar stock de producto',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'Stock del producto' } },
+      },
+    },
+    '/health/products/{productId}/withdrawal/{animalId}': {
+      get: {
+        tags: ['Health'],
+        summary: 'Verificar período de retiro',
+        parameters: [
+          { name: 'productId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+          { name: 'animalId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'Información del período de retiro' } },
+      },
+    },
+    '/health/products/inventory': {
+      post: {
+        tags: ['Health'],
+        summary: 'Registrar movimiento de inventario',
+        responses: { '201': { description: 'Movimiento registrado' } },
+      },
+    },
     '/health/tasks': {
       get: {
         tags: ['Health'],
@@ -366,6 +441,98 @@ export const swaggerSpec: SwaggerDefinition & { paths: any } = {
         tags: ['Health'],
         summary: 'Crear tarea de salud',
         responses: { '201': { description: 'Tarea creada' } },
+      },
+    },
+    '/health/tasks/{id}': {
+      get: {
+        tags: ['Health'],
+        summary: 'Obtener detalles de tarea',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'Detalles de la tarea' } },
+      },
+      put: {
+        tags: ['Health'],
+        summary: 'Actualizar tarea',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'Tarea actualizada' } },
+      },
+    },
+    '/health/tasks/{id}/complete': {
+      patch: {
+        tags: ['Health'],
+        summary: 'Completar tarea',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'Tarea completada' } },
+      },
+    },
+    '/health/tasks/{id}/cancel': {
+      patch: {
+        tags: ['Health'],
+        summary: 'Cancelar tarea',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'Tarea cancelada' } },
+      },
+    },
+    '/health/tasks/overdue': {
+      get: {
+        tags: ['Health'],
+        summary: 'Tareas vencidas',
+        responses: { '200': { description: 'Lista de tareas vencidas' } },
+      },
+    },
+    '/health/rations': {
+      get: {
+        tags: ['Health'],
+        summary: 'Listar raciones',
+        responses: { '200': { description: 'Lista de raciones' } },
+      },
+      post: {
+        tags: ['Health'],
+        summary: 'Crear ración',
+        responses: { '201': { description: 'Ración creada' } },
+      },
+    },
+    '/health/rations/{id}': {
+      get: {
+        tags: ['Health'],
+        summary: 'Obtener detalles de ración',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'Detalles de la ración' } },
+      },
+      put: {
+        tags: ['Health'],
+        summary: 'Actualizar ración',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'Ración actualizada' } },
+      },
+    },
+    '/health/rations/{id}/ingredients': {
+      post: {
+        tags: ['Health'],
+        summary: 'Agregar ingrediente a ración',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '201': { description: 'Ingrediente agregado' } },
+      },
+    },
+    '/health/rations/assign-lot': {
+      post: {
+        tags: ['Health'],
+        summary: 'Asignar ración a lote',
+        responses: { '201': { description: 'Ración asignada' } },
       },
     },
     '/lots': {
@@ -380,47 +547,406 @@ export const swaggerSpec: SwaggerDefinition & { paths: any } = {
         responses: { '201': { description: 'Lote creado' } },
       },
     },
-    '/reproduction/services': {
-      get: {
-        tags: ['Reproduction'],
-        summary: 'Listar servicios reproductivos',
-        responses: { '200': { description: 'Lista de servicios' } },
-      },
+    '/reproduction/service': {
       post: {
         tags: ['Reproduction'],
-        summary: 'Registrar servicio',
+        summary: 'Registrar servicio reproductivo',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['femaleId', 'maleId', 'serviceDate', 'method'],
+                properties: {
+                  femaleId: { type: 'string', format: 'uuid' },
+                  maleId: { type: 'string', format: 'uuid' },
+                  serviceDate: { type: 'string', format: 'date-time' },
+                  method: { type: 'string', enum: ['NATURAL', 'ARTIFICIAL'] },
+                  observations: { type: 'string' },
+                },
+              },
+            },
+          },
+        },
         responses: { '201': { description: 'Servicio registrado' } },
       },
     },
-    '/senasag/gmas': {
+    '/reproduction/diagnosis': {
+      post: {
+        tags: ['Reproduction'],
+        summary: 'Registrar diagnóstico',
+        responses: { '201': { description: 'Diagnóstico registrado' } },
+      },
+    },
+    '/reproduction/birth': {
+      post: {
+        tags: ['Reproduction'],
+        summary: 'Registrar parto',
+        responses: { '201': { description: 'Parto registrado' } },
+      },
+    },
+    '/reproduction/weaning': {
+      post: {
+        tags: ['Reproduction'],
+        summary: 'Registrar destete',
+        responses: { '201': { description: 'Destete registrado' } },
+      },
+    },
+    '/reproduction/cycles': {
+      get: {
+        tags: ['Reproduction'],
+        summary: 'Listar ciclos reproductivos',
+        responses: { '200': { description: 'Lista de ciclos' } },
+      },
+    },
+    '/reproduction/stats': {
+      get: {
+        tags: ['Reproduction'],
+        summary: 'Estadísticas reproductivas',
+        responses: { '200': { description: 'Estadísticas de la finca' } },
+      },
+    },
+    '/reproduction/cycles/{femaleId}': {
+      get: {
+        tags: ['Reproduction'],
+        summary: 'Obtener ciclo por hembra',
+        parameters: [
+          { name: 'femaleId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'Ciclo de la hembra' } },
+      },
+    },
+    '/reproduction/performance/{femaleId}': {
+      get: {
+        tags: ['Reproduction'],
+        summary: 'Calcular rendimiento reproductivo',
+        parameters: [
+          { name: 'femaleId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'Rendimiento de la hembra' } },
+      },
+    },
+    '/senasag/gma': {
       get: {
         tags: ['SENASAG'],
-        summary: 'Listar GMAs',
+        summary: 'Listar GMAs (Guías de Movimiento Animal)',
+        description: 'Obtiene la lista de guías de movimiento animal con filtros',
+        parameters: [
+          { name: 'status', in: 'query', schema: { type: 'string' } },
+          { name: 'type', in: 'query', schema: { type: 'string' } },
+        ],
         responses: { '200': { description: 'Lista de GMAs' } },
       },
       post: {
         tags: ['SENASAG'],
         summary: 'Crear GMA',
+        description: 'Crea una nueva guía de movimiento animal',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['originFarmId', 'transporterId', 'destinationId', 'type'],
+                properties: {
+                  originFarmId: { type: 'string', format: 'uuid' },
+                  transporterId: { type: 'string', format: 'uuid' },
+                  destinationId: { type: 'string', format: 'uuid' },
+                  type: { type: 'string' },
+                  estimatedArrivalDate: { type: 'string', format: 'date-time' },
+                  route: { type: 'string' },
+                  distanceKm: { type: 'number' },
+                },
+              },
+            },
+          },
+        },
         responses: { '201': { description: 'GMA creado' } },
+      },
+    },
+    '/senasag/gma/{id}': {
+      get: {
+        tags: ['SENASAG'],
+        summary: 'Obtener detalles de GMA',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'Detalles del GMA' } },
+      },
+    },
+    '/senasag/gma/{id}/approve': {
+      patch: {
+        tags: ['SENASAG'],
+        summary: 'Aprobar GMA',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'GMA aprobado' } },
+      },
+    },
+    '/senasag/gma/{id}/reject': {
+      patch: {
+        tags: ['SENASAG'],
+        summary: 'Rechazar GMA',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'GMA rechazado' } },
+      },
+    },
+    '/senasag/gma/{id}/transit': {
+      patch: {
+        tags: ['SENASAG'],
+        summary: 'Marcar GMA en tránsito',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'GMA marcado en tránsito' } },
+      },
+    },
+    '/senasag/gma/{id}/close': {
+      patch: {
+        tags: ['SENASAG'],
+        summary: 'Cerrar GMA',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'GMA cerrado' } },
+      },
+    },
+    '/senasag/gma/{id}/animals': {
+      get: {
+        tags: ['SENASAG'],
+        summary: 'Listar animales del GMA',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'Lista de animales' } },
+      },
+      post: {
+        tags: ['SENASAG'],
+        summary: 'Agregar animal al GMA',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '201': { description: 'Animal agregado' } },
+      },
+    },
+    '/senasag/documents': {
+      get: {
+        tags: ['SENASAG'],
+        summary: 'Listar documentos regulatorios',
+        responses: { '200': { description: 'Lista de documentos' } },
+      },
+      post: {
+        tags: ['SENASAG'],
+        summary: 'Crear documento regulatorio',
+        responses: { '201': { description: 'Documento creado' } },
+      },
+    },
+    '/senasag/documents/expiring': {
+      get: {
+        tags: ['SENASAG'],
+        summary: 'Documentos próximos a vencer',
+        responses: { '200': { description: 'Lista de documentos próximos a vencer' } },
+      },
+    },
+    '/senasag/documents/{id}/status': {
+      patch: {
+        tags: ['SENASAG'],
+        summary: 'Actualizar estado de documento',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'Estado actualizado' } },
       },
     },
     '/finance/movements': {
       get: {
         tags: ['Finance'],
         summary: 'Listar movimientos financieros',
+        description: 'Obtiene lista de movimientos con filtros',
         responses: { '200': { description: 'Lista de movimientos' } },
       },
       post: {
         tags: ['Finance'],
-        summary: 'Registrar movimiento',
+        summary: 'Registrar movimiento financiero',
         responses: { '201': { description: 'Movimiento registrado' } },
       },
     },
-    '/admin/sync': {
+    '/finance/movements/{id}': {
+      get: {
+        tags: ['Finance'],
+        summary: 'Obtener detalles de movimiento',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'Detalles del movimiento' } },
+      },
+    },
+    '/finance/movements/{id}/approve': {
+      patch: {
+        tags: ['Finance'],
+        summary: 'Aprobar movimiento',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'Movimiento aprobado' } },
+      },
+    },
+    '/finance/movements/{id}/payment': {
+      patch: {
+        tags: ['Finance'],
+        summary: 'Marcar como pagado',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'Movimiento marcado como pagado' } },
+      },
+    },
+    '/finance/movements/{id}/cancel': {
+      patch: {
+        tags: ['Finance'],
+        summary: 'Cancelar movimiento',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'Movimiento cancelado' } },
+      },
+    },
+    '/finance/movements/overdue': {
+      get: {
+        tags: ['Finance'],
+        summary: 'Pagos vencidos',
+        responses: { '200': { description: 'Lista de pagos vencidos' } },
+      },
+    },
+    '/finance/reports/profit': {
+      get: {
+        tags: ['Finance'],
+        summary: 'Calcular rentabilidad',
+        description: 'Calcula la rentabilidad de la finca en un período',
+        responses: { '200': { description: 'Reporte de rentabilidad' } },
+      },
+    },
+    '/finance/reports/lot-profitability/{lotId}': {
+      get: {
+        tags: ['Finance'],
+        summary: 'Rentabilidad por lote',
+        parameters: [
+          { name: 'lotId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'Rentabilidad del lote' } },
+      },
+    },
+    '/finance/third-parties': {
+      get: {
+        tags: ['Finance'],
+        summary: 'Listar terceros',
+        description: 'Lista de proveedores, clientes y otros terceros',
+        responses: { '200': { description: 'Lista de terceros' } },
+      },
+      post: {
+        tags: ['Finance'],
+        summary: 'Crear tercero',
+        responses: { '201': { description: 'Tercero creado' } },
+      },
+    },
+    '/finance/third-parties/{id}': {
+      get: {
+        tags: ['Finance'],
+        summary: 'Obtener detalles de tercero',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'Detalles del tercero' } },
+      },
+      put: {
+        tags: ['Finance'],
+        summary: 'Actualizar tercero',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'Tercero actualizado' } },
+      },
+    },
+    '/finance/categories': {
+      get: {
+        tags: ['Finance'],
+        summary: 'Listar categorías financieras',
+        responses: { '200': { description: 'Lista de categorías' } },
+      },
+      post: {
+        tags: ['Finance'],
+        summary: 'Crear categoría',
+        responses: { '201': { description: 'Categoría creada' } },
+      },
+    },
+    '/admin/sync/initiate': {
       post: {
         tags: ['Sync'],
-        summary: 'Sincronizar datos',
-        responses: { '200': { description: 'Sincronización exitosa' } },
+        summary: 'Iniciar sincronización',
+        description: 'Inicia un proceso de sincronización de datos offline',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['deviceId'],
+                properties: {
+                  deviceId: { type: 'string' },
+                  lastSyncDate: { type: 'string', format: 'date-time' },
+                },
+              },
+            },
+          },
+        },
+        responses: { '200': { description: 'Sincronización iniciada' } },
+      },
+    },
+    '/admin/sync/apply': {
+      post: {
+        tags: ['Sync'],
+        summary: 'Aplicar cambios de sincronización',
+        description: 'Aplica los cambios recibidos durante la sincronización',
+        responses: { '200': { description: 'Cambios aplicados' } },
+      },
+    },
+    '/admin/sync/status': {
+      get: {
+        tags: ['Sync'],
+        summary: 'Estado de sincronización',
+        description: 'Obtiene el estado actual de la sincronización',
+        responses: { '200': { description: 'Estado de sincronización' } },
+      },
+    },
+    '/admin/sync/history': {
+      get: {
+        tags: ['Sync'],
+        summary: 'Historial de sincronización',
+        description: 'Obtiene el historial de sincronizaciones realizadas',
+        responses: { '200': { description: 'Historial de sincronización' } },
+      },
+    },
+    '/admin/sync/conflicts': {
+      get: {
+        tags: ['Sync'],
+        summary: 'Listar conflictos sin resolver',
+        description: 'Obtiene la lista de conflictos de sincronización pendientes',
+        responses: { '200': { description: 'Lista de conflictos' } },
+      },
+    },
+    '/admin/sync/conflicts/{id}/resolve': {
+      post: {
+        tags: ['Sync'],
+        summary: 'Resolver conflicto',
+        description: 'Resuelve un conflicto de sincronización',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: { '200': { description: 'Conflicto resuelto' } },
       },
     },
   },

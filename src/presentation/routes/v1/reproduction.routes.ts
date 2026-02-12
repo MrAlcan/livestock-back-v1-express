@@ -23,10 +23,10 @@ export function createReproductionRoutes(
 
   // ─── Queries ───────────────────────────────────────────────────────
 
-  router.get('/cycles/:femaleId', auth, reproductionController.getCycle);
   router.get('/cycles', auth, validateQuery(reproductiveCycleFiltersSchema), reproductionController.listActiveCycles);
-  router.get('/performance/:femaleId', auth, reproductionController.calculatePerformance);
   router.get('/stats', auth, reproductionController.getFarmStats);
+  router.get('/cycles/:femaleId', auth, reproductionController.getCycle);
+  router.get('/performance/:femaleId', auth, reproductionController.calculatePerformance);
 
   return router;
 }

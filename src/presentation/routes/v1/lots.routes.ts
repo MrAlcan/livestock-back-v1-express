@@ -22,7 +22,6 @@ export function createLotRoutes(
   router.post('/', auth, validate(createLotSchema), lotController.createLot);
   router.get('/', auth, validateQuery(lotFiltersSchema), lotController.listLots);
   router.get('/active', auth, lotController.listActiveLotsForFarm);
-  router.get('/:id', auth, validateParams(uuidParamSchema), lotController.getLotDetails);
   router.patch('/:id/close', auth, rbac(['PROPIETARIO', 'CAPATAZ']), lotController.closeLot);
   router.patch('/:id/average-weight', auth, lotController.updateLotAverageWeight);
   router.get('/:id/target-check', auth, lotController.checkLotTargetWeight);
@@ -36,6 +35,10 @@ export function createLotRoutes(
   router.get('/paddocks/:id', auth, validateParams(uuidParamSchema), paddockController.getPaddockDetails);
   router.get('/paddocks/:id/capacity', auth, paddockController.checkCapacity);
   router.patch('/paddocks/:id/condition', auth, validate(updatePaddockConditionSchema), paddockController.updateCondition);
+
+  // ─── Lot by ID (must be after specific routes) ────────────────────
+
+  router.get('/:id', auth, validateParams(uuidParamSchema), lotController.getLotDetails);
 
   return router;
 }
