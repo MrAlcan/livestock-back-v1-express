@@ -16,7 +16,7 @@ export class AnimalMapper {
       birthDate: animal.birthDate?.toISOString(),
       isEstimatedBirthDate: animal.isEstimatedBirthDate,
       ageMonths: age ? age.toMonths() : undefined,
-      breedId: animal.breedId?.value,
+      breedId: animal.breedId,
       breedPercentage: animal.breedPercentage,
       coatColor: animal.coatColor,
       status: animal.status,

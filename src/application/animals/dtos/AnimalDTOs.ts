@@ -92,7 +92,7 @@ export interface AnimalResponseDTO {
   readonly birthDate?: string;
   readonly isEstimatedBirthDate: boolean;
   readonly ageMonths?: number;
-  readonly breedId?: string;
+  readonly breedId?: number;
   readonly breedPercentage?: number;
   readonly coatColor?: string;
   readonly status: string;

@@ -25,7 +25,7 @@ export class AnimalService {
       let breedDTO: BreedResponseDTO | undefined;
 
       if (animal.breedId) {
-        const breed = await this.breedRepository.findById(Number(animal.breedId.value));
+        const breed = await this.breedRepository.findById(animal.breedId);
         if (breed) {
           breedDTO = BreedMapper.toDTO(breed);
         }

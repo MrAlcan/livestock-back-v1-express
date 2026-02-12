@@ -44,7 +44,7 @@ export class RegisterAnimal implements IUseCase<RegisterAnimalInputDTO, AnimalRe
         sex: input.sex,
         birthDate: input.birthDate ? new Date(input.birthDate) : undefined,
         isEstimatedBirthDate: input.isEstimatedBirthDate ?? false,
-        breedId: input.breedId ? new UniqueId(input.breedId) : undefined,
+        breedId: input.breedId ? Number(input.breedId) : undefined,
         breedPercentage: input.breedPercentage,
         coatColor: input.coatColor,
         status: AnimalStatus.ACTIVE,
