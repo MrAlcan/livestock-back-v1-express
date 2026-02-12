@@ -15,7 +15,7 @@ interface AnimalProps {
   sex: AnimalSex;
   birthDate?: Date;
   isEstimatedBirthDate: boolean;
-  breedId?: UniqueId;
+  breedId?: number;
   breedPercentage?: number;
   coatColor?: string;
   status: AnimalStatus;
@@ -48,7 +48,7 @@ export class Animal extends AggregateRoot<AnimalProps> {
   private readonly _sex: AnimalSex;
   private _birthDate?: Date;
   private _isEstimatedBirthDate: boolean;
-  private _breedId?: UniqueId;
+  private _breedId?: number;
   private _breedPercentage?: number;
   private _coatColor?: string;
   private _status: AnimalStatus;
@@ -127,7 +127,7 @@ export class Animal extends AggregateRoot<AnimalProps> {
   get sex(): AnimalSex { return this._sex; }
   get birthDate(): Date | undefined { return this._birthDate; }
   get isEstimatedBirthDate(): boolean { return this._isEstimatedBirthDate; }
-  get breedId(): UniqueId | undefined { return this._breedId; }
+  get breedId(): number | undefined { return this._breedId; }
   get breedPercentage(): number | undefined { return this._breedPercentage; }
   get coatColor(): string | undefined { return this._coatColor; }
   get status(): AnimalStatus { return this._status; }
